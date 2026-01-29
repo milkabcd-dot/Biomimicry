@@ -1,176 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Biomimicry Quiz Game</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חידון ביומימיקרי</title>
 <style>
-  body { font-family: Arial, sans-serif; text-align: center; background: #fafafa; padding: 40px; }
-  img { max-width: 80%; height: auto; margin-bottom: 20px; border-radius: 8px; }
-  .question { font-size: 1.3em; margin-bottom: 15px; }
-  .btn { display: block; margin: 10px auto; padding: 12px 20px; width: 60%; font-size: 1em; cursor: pointer; border-radius: 5px; border: none; background: #3366cc; color: white; }
-  .btn:hover { background: #264b99; }
-  .feedback { margin-top: 15px; font-size: 1.2em; }
-  #nextBtn { margin-top: 20px; background: #28a745; }
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: right;
+    direction: rtl;
+    background-color: #f2f2f2;
+  }
+
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+  }
+
+  .question {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .options button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    transition: background-color 0.3s;
+  }
+
+  .options button:hover {
+    background-color: #2980b9;
+  }
+
+  #explanation {
+    margin-top: 15px;
+    color: green;
+    font-style: italic;
+  }
+
+  #editor {
+    margin-top: 40px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    .options button { font-size: 18px; }
+  }
 </style>
 </head>
 <body>
 
-<h1>Biomimicry Quiz Game</h1>
-<div id="gameContainer">
-  <img id="quizImage" src="" alt="Biomimicry Image" />
-  <div class="question" id="questionText"></div>
-  <button class="btn" id="ans0"></button>
-  <button class="btn" id="ans1"></button>
-  <button class="btn" id="ans2"></button>
-  <div class="feedback" id="feedback"></div>
-  <button class="btn" id="nextBtn" style="display:none;">Next</button>
+<h1>חידון ביומימיקרי</h1>
+
+<div id="quiz-container">
+  <div id="question" class="question"></div>
+  <div class="options">
+    <button id="option0"></button>
+    <button id="option1"></button>
+    <button id="option2"></button>
+    <button id="option3"></button>
+  </div>
+  <div id="explanation"></div>
 </div>
 
+<div id="editor">עריכה: מילכה ברקו גרש</div>
+
 <script>
-const quizData = [
+const questions = [
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/cactus.jpg?raw=true",
-    question: "איך הצמח הזה שומר על מים בסביבה מדברית?",
-    answers: ["יש לו שערות רבות", "הוא פותח פירות רטובים", "יש לו מבנה שמפחית אידוי"],
-    correct: 2
+    question: "איזו המצאה הושפעה מצמח הברדוק?",
+    options: ["וולקרו (Velcro)", "רדיו", "מכונית", "טלסקופ"],
+    correct: 0,
+    explanation: "וולקרו נוצר בהשראת הברדוק, בעקבות הקוצים הקטנים שמדביקים עצמם לבדים."
   },
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/gecko.jpg?raw=true",
-    question: "איך החיה הזו מטפסת על משטחים חלקים?",
-    answers: ["יש לה ציפורניים חדות", "יש לה כוחות ואן־דר־ואלס", "היא מזריקה דבק"],
-    correct: 1
+    question: "באיזו דרך השראת שלדג השפיעה על טכנולוגיה?",
+    options: ["רכבת מהירה", "מטוס סילון", "ספינת מלחמה", "רובוט חקלאי"],
+    correct: 0,
+    explanation: "רכבת השינקנסן ביפן עוצבה בהשראת מקור השלדג כדי להפחית רעש ולשפר את היעילות האווירודינמית."
   },
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/bat-echolocation.jpg?raw=true",
-    question: "איך עטלף זה מוצא דרכו בחושך?",
-    answers: ["באמצעות ראייה חדה", "באמצעות חוש ריח", "באמצעות הד שמוחזר מהסביבה"],
-    correct: 2
+    question: "איזו השראה משפרת בדיקות דם פחות כואבות?",
+    options: ["חדק יתושה", "שן כריש", "כנף דבורה", "עור תנין"],
+    correct: 0,
+    explanation: "מחטים ביומימיות השראה מחדק היתושה כדי לצמצם כאב ולשפר זרימת דם."
   },
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/honeycomb.jpg?raw=true",
-    question: "מה מבנה התאים בדבורה הזו מאפשר?",
-    answers: ["לעוף מהר יותר", "לעשות דבש אדיר", "לנצל מינימום חומר למקסימום שטח"],
-    correct: 2
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/insect-eye.jpg?raw=true",
-    question: "איך החרק הזה רואה תמונות רחבות?",
-    answers: ["עם עדשה אחת גדולה", "עם עין מורכבת של אלפי פאסטים", "עם זוהר לילה"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/kingfisher-beak.jpg?raw=true",
-    question: "איך ציפור זו נכנסת למים בלי התזת גדולה?",
-    answers: ["עם מקור חד ואווירודינמי", "עם כנף רחבה", "עם תנועה איטית"],
-    correct: 0
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/leafcutter-ant.jpg?raw=true",
-    question: "איך נמלה זו סוחבת עלים כבדים כל כך?",
-    answers: ["עם שרירים חזקים יחסית לגוף", "עם רגליים מיוחדות", "עם טפרים דביקים"],
-    correct: 0
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/lotus-leaf.jpg?raw=true",
-    question: "איך עלה לוטוס נשאר נקי גם בבוץ?",
-    answers: ["הוא שורף לכלוך", "המים מתגלגלים ומוציאים לכלוך", "הוא שואב לכלוך פנימה"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/nautilus.jpg?raw=true",
-    question: "מה מיוחד במבנה הקונכייה הזו?",
-    answers: ["היא חלקלקה במיוחד", "היא בצורת ספירלה חזקה", "היא שקופה"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/owl-wing.jpg?raw=true",
-    question: "איך ינשוף זה מעופף כמעט בלי רעש?",
-    answers: ["כנפיים קטנות", "מבנה נוצות משונן", "עם זנב ארוך"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/polar-bear-fur.jpg?raw=true",
-    question: "איך פרוות דוב קוטב שומרת על חום?",
-    answers: ["היא שחורה ונספגת חום", "יש שערות חלולות המבודדות", "היא דקה במיוחד"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/seashell.jpg?raw=true",
-    question: "איך צדף זה כל כך חזק למרות החומר הפשוט?",
-    answers: ["הוא חלקלק במיוחד", "מבנה שכבות שמונע סדקים", "יש לו שריון מפלדה"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/shark-skin.jpg?raw=true",
-    question: "איך כריש זה מפחית חיכוך ומונע הצטברות חיידקים?",
-    answers: ["עם תנועה מהירה בלבד", "עם מרקם מיוחד של קשקשים", "עם שכבת פרווה"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/spider-web.jpg?raw=true",
-    question: "מה מיוחד בקורי העכביש?",
-    answers: ["הם עשויים מפלדה", "הם חזקים וגמישים", "הם מבריקים מאוד"],
-    correct: 1
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/toucan-beak.jpg?raw=true",
-    question: "איך מקור הטוקן קל אך חזק?",
-    answers: ["הוא עשוי פלסטיק", "הוא מסיבי וחזק מבפנים", "הוא מחובר עם דבק טבעי"],
-    correct: 1
+    question: "איזו מערכת השראת זיקית משמשת בטכנולוגיה?",
+    options: ["חיישני צבע", "מכונית חשמלית", "לוויין", "טלפון חכם"],
+    correct: 0,
+    explanation: "שינוי צבע הזיקית נותן השראה לחיישנים מתקדמים ולחומרים משתנים צבע בתעשייה."
   }
 ];
 
 let currentIndex = 0;
 
-const quizImage = document.getElementById("quizImage");
-const questionText = document.getElementById("questionText");
-const feedback = document.getElementById("feedback");
-const nextBtn = document.getElementById("nextBtn");
-
-function loadQuestion() {
-  const q = quizData[currentIndex];
-  quizImage.src = q.image;
-  questionText.textContent = q.question;
-  feedback.textContent = "";
-  nextBtn.style.display = "none";
-  q.answers.forEach((ans, idx) => {
-    const btn = document.getElementById("ans" + idx);
-    btn.textContent = ans;
-    btn.disabled = false;
-    btn.style.background = "#3366cc";
-    btn.onclick = () => checkAnswer(idx);
+function showQuestion(index) {
+  const q = questions[index];
+  document.getElementById("question").innerText = q.question;
+  q.options.forEach((option, i) => {
+    const button = document.getElementById("option" + i);
+    button.innerText = option;
+    button.onclick = () => checkAnswer(i);
   });
+  document.getElementById("explanation").innerText = "";
 }
 
 function checkAnswer(selected) {
-  const q = quizData[currentIndex];
-  q.answers.forEach((_, idx) => {
-    document.getElementById("ans" + idx).disabled = true;
-  });
+  const q = questions[currentIndex];
   if (selected === q.correct) {
-    feedback.textContent = "✔️ נכון!";
-    document.getElementById("ans" + selected).style.background = "#28a745";
+    alert("נכון!");
+    document.getElementById("explanation").innerText = q.explanation;
   } else {
-    feedback.textContent = "❌ לא נכון!";
-    document.getElementById("ans" + selected).style.background = "#dc3545";
-    document.getElementById("ans" + q.correct).style.background = "#28a745";
+    alert("לא נכון, נסה שוב");
+    return;
   }
-  nextBtn.style.display = "block";
+  currentIndex++;
+  if(currentIndex < questions.length){
+    showQuestion(currentIndex);
+  } else {
+    alert("סיימת את החידון!");
+    document.getElementById("question").innerText = "סיימת את החידון!";
+    document.querySelector(".options").style.display = "none";
+  }
 }
 
-nextBtn.onclick = () => {
-  currentIndex++;
-  if (currentIndex < quizData.length) {
-    loadQuestion();
-  } else {
-    feedback.textContent = "🎉 סיימת את כל החידות!";
-    document.getElementById("gameContainer").innerHTML = "<h2>כל הכבוד!</h2><p>השתמשי מחדש בעיצוב לטעינה חוזרת.</p>";
-  }
-};
-
-loadQuestion();
+showQuestion(currentIndex);
 </script>
 
 </body>
 </html>
+
+
