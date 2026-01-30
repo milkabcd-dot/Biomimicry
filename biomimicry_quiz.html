@@ -4,590 +4,273 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>חידון ביומימיקרי - טכנולוגיה בהשראת הטבע</title>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  #gameWrapper {
-    max-width: 800px;
-    width: 100%;
-  }
-  
-  h1 {
-    color: white;
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-  }
-  
-  .editor-credit {
-    color: white;
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 1.1em;
-    font-weight: 600;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-    opacity: 0.95;
-  }
-  
-  #gameContainer {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  }
-  
-  .progress-bar {
-    width: 100%;
-    height: 8px;
-    background: #e0e0e0;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    overflow: hidden;
-  }
-  
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-    transition: width 0.3s ease;
-  }
-  
-  .question-number {
-    text-align: center;
-    color: #666;
-    font-size: 0.9em;
-    margin-bottom: 20px;
-    font-weight: 600;
-  }
-  
-  img { 
-    max-width: 100%;
-    height: 400px;
-    object-fit: cover;
-    margin: 0 auto 30px;
-    border-radius: 15px;
-    display: block;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  }
-  
-  .question { 
-    font-size: 1.5em;
-    margin-bottom: 30px;
-    color: #2c3e50;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.5;
-  }
-  
-  .answers-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  
-  .btn { 
-    padding: 18px 25px;
-    font-size: 1.1em;
-    cursor: pointer;
-    border-radius: 12px;
-    border: 2px solid #e0e0e0;
-    background: white;
-    color: #2c3e50;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    text-align: right;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn:hover:not(:disabled) { 
-    background: #f8f9fa;
-    border-color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-  }
-  
-  .btn:disabled {
-    cursor: not-allowed;
-  }
-  
-  .btn.correct {
-    background: #d4edda !important;
-    border-color: #28a745 !important;
-    color: #155724;
-    font-weight: 600;
-  }
-  
-  .btn.incorrect {
-    background: #f8d7da !important;
-    border-color: #dc3545 !important;
-    color: #721c24;
-  }
-  
-  .feedback { 
-    margin-top: 25px;
-    padding: 20px;
-    font-size: 1.1em;
-    border-radius: 12px;
-    text-align: right;
-    line-height: 1.8;
-    animation: slideIn 0.4s ease;
-  }
-  
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .feedback.correct {
-    background: #d4edda;
-    border: 2px solid #28a745;
-    color: #155724;
-  }
-  
-  .feedback.incorrect {
-    background: #f8d7da;
-    border: 2px solid #dc3545;
-    color: #721c24;
-  }
-  
-  .tech-info {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 2px solid rgba(0,0,0,0.1);
-    font-size: 0.95em;
-    font-weight: normal;
-  }
-  
-  .tech-info strong {
-    color: #667eea;
-    display: block;
-    margin-bottom: 8px;
-    font-size: 1.05em;
-  }
-  
-  #nextBtn { 
-    margin-top: 25px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 18px 40px;
-    font-size: 1.2em;
-    font-weight: 600;
-    width: 100%;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-  }
-  
-  #nextBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
-  }
-  
-  .final-screen {
-    text-align: center;
-    padding: 40px 20px;
-  }
-  
-  .final-screen h2 {
-    color: #667eea;
-    font-size: 2.5em;
-    margin-bottom: 20px;
-  }
-  
-  .final-screen p {
-    font-size: 1.3em;
-    color: #666;
-    margin-bottom: 30px;
-  }
-  
-  .score-display {
-    font-size: 3em;
-    color: #764ba2;
-    font-weight: bold;
-    margin: 20px 0;
-  }
-  
-  .restart-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 18px 50px;
-    font-size: 1.2em;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s ease;
-  }
-  
-  .restart-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
-  }
 
-  @media (max-width: 600px) {
-    h1 {
-      font-size: 1.8em;
-    }
-    
-    #gameContainer {
-      padding: 25px;
-    }
-    
-    img {
-      height: 250px;
-    }
-    
-    .question {
-      font-size: 1.2em;
-    }
-    
-    .btn {
-      font-size: 1em;
-      padding: 15px 20px;
-    }
-  }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#gameWrapper { max-width: 800px; width:100%; }
+
+h1 {
+  color:white;
+  text-align:center;
+  margin-bottom:10px;
+  font-size:2.5em;
+  text-shadow:2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.editor-credit {
+  color:white;
+  text-align:center;
+  margin-bottom:30px;
+  font-size:1.1em;
+  font-weight:600;
+}
+
+#gameContainer {
+  background:white;
+  border-radius:20px;
+  padding:40px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+
+.progress-bar {
+  width:100%;
+  height:8px;
+  background:#e0e0e0;
+  border-radius:10px;
+  margin-bottom:30px;
+  overflow:hidden;
+}
+
+.progress-fill {
+  height:100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  width:0%;
+}
+
+.question-number {
+  text-align:center;
+  color:#666;
+  margin-bottom:20px;
+  font-weight:600;
+}
+
+img {
+  max-width:100%;
+  height:400px;
+  object-fit:cover;
+  margin:0 auto 30px;
+  border-radius:15px;
+  display:block;
+}
+
+.question {
+  font-size:1.5em;
+  margin-bottom:30px;
+  color:#2c3e50;
+  font-weight:600;
+  text-align:center;
+}
+
+.answers-grid {
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.btn {
+  padding:18px 25px;
+  font-size:1.1em;
+  cursor:pointer;
+  border-radius:12px;
+  border:2px solid #e0e0e0;
+  background:white;
+  transition:0.3s;
+  text-align:right;
+}
+
+.btn:hover:not(:disabled) {
+  border-color:#667eea;
+  background:#f8f9fa;
+}
+
+.btn.correct { background:#d4edda; border-color:#28a745; }
+.btn.incorrect { background:#f8d7da; border-color:#dc3545; }
+
+.feedback {
+  margin-top:25px;
+  padding:20px;
+  border-radius:12px;
+  display:none;
+}
+
+.feedback.correct { background:#d4edda; }
+.feedback.incorrect { background:#f8d7da; }
+
+#nextBtn {
+  margin-top:25px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+  border:none;
+  padding:18px;
+  font-size:1.2em;
+  width:100%;
+  display:none;
+}
+
+.final-screen {
+  text-align:center;
+}
 </style>
 </head>
+
 <body>
 
 <div id="gameWrapper">
-  <h1>🌿 חידון ביומימיקרי 🔬</h1>
-  <div class="editor-credit">עריכה: מילכה ברקו גרש</div>
-  <div id="gameContainer">
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div class="question-number" id="questionNumber"></div>
-    <img id="quizImage" src="" alt="תמונת ביומימיקרי" />
-    <div class="question" id="questionText"></div>
-    <div class="answers-grid">
-      <button class="btn" id="ans0"></button>
-      <button class="btn" id="ans1"></button>
-      <button class="btn" id="ans2"></button>
-    </div>
-    <div class="feedback" id="feedback" style="display:none;"></div>
-    <button class="btn" id="nextBtn" style="display:none;">השאלה הבאה ←</button>
+<h1>🌿 חידון ביומימיקרי 🔬</h1>
+<div class="editor-credit">עריכה: מילכה ברקו גרש</div>
+
+<div id="gameContainer">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="question-number" id="questionNumber"></div>
+  <img id="quizImage">
+  <div class="question" id="questionText"></div>
+
+  <div class="answers-grid">
+    <button class="btn" id="ans0"></button>
+    <button class="btn" id="ans1"></button>
+    <button class="btn" id="ans2"></button>
   </div>
+
+  <div class="feedback" id="feedback"></div>
+  <button class="btn" id="nextBtn">השאלה הבאה ←</button>
+</div>
 </div>
 
 <script>
+// ---------- ערבוב ----------
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ---------- נתונים ----------
 const quizData = [
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/cactus.jpg?raw=true",
-    creature: "קקטוס",
-    question: "איך הקקטוס שומר על מים בסביבה מדברית?",
-    answers: [
-      "שכבת שעווה עבה המונעת אידוי והקפלות שמגדילות שטח פנים להצללה",
-      "שורשים ארוכים במיוחד השואבים מים ממרחקים",
-      "פתיחת נקבוביות רק בלילה כדי למנוע אובדן מים"
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/cactus.jpg?raw=true",
+    question:"איך הקקטוס שומר על מים בסביבה מדברית?",
+    answers:[
+      "שכבת שעווה עבה וקפלים שמקטינים אידוי",
+      "שורשים עמוקים במיוחד",
+      "פתיחת נקבוביות רק בלילה"
     ],
-    correct: 0,
-    techInfo: "עיצוב מבנים בסביבות צחיחות - ארכיטקטים משתמשים במבנה הקפלים של קקטוס לעיצוב גגות שמספקים הצללה מקסימלית תוך חיסכון בחומרים. גם טכנולוגיות איסוף מים ממקורות מינימליים פותחו בהשראתו."
+    correct:0,
+    techInfo:"עיצוב מבנים לחיסכון במים"
   },
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/gecko.jpg?raw=true",
-    creature: "שממית (גקו)",
-    question: "איך השממית מטפסת על משטחים חלקים אנכיים?",
-    answers: [
-      "מיליוני שערות ננומטריות ביד שיוצרות כוחות ואן-דר-ואלס עם כל משטח",
-      "הפרשת נוזל דביק מבלוטות מיוחדות בכפות הרגליים",
-      "ציפורניים מיקרוסקופיות חדות שנצמדות לחריצים זעירים"
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/gecko.jpg?raw=true",
+    question:"איך השממית מטפסת על קירות?",
+    answers:[
+      "שערות ננומטריות היוצרות כוחות ואן־דר־ואלס",
+      "הפרשת דבק",
+      "ציפורניים חדות"
     ],
-    correct: 0,
-    techInfo: "פיתוח דבקים יבשים וסרטים דביקים - חברת NASA פיתחה Geckskin, סרט דביק חזק שניתן להסרה ללא שאריות, בהשראת השממית. משמש לרובוטיקה, ציוד רפואי ואפילו לטיפוס על קירות בחלל."
+    correct:0,
+    techInfo:"דבקים יבשים ורובוטיקה"
   },
   {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/bat-echolocation.jpg?raw=true",
-    creature: "עטלף",
-    question: "איך העטלף מנווט ומזהה טרף בחושך מוחלט?",
-    answers: [
-      "פליטת גלי על-קול והקשבה לההדים החוזרים ליצירת מפה תלת-ממדית",
-      "זיהוי שדות אלקטרומגנטיים שמפיקים בעלי חיים חיים",
-      "חוש ריח מפותח במיוחד המזהה פרומונים של טרף ממרחק"
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/insect-eye.jpg?raw=true",
+    question:"איך עין חרק רואה כמעט 360°?",
+    answers:[
+      "אלפי עדשות זעירות",
+      "עין מסתובבת",
+      "מראות פנימיות"
     ],
-    correct: 0,
-    techInfo: "מכשירי סונאר ועזרים לעיווריםWeWALK - מקל חכם לעיוורים המשתמש בטכנולוגיית על-קול בהשראת עטלפים. גם מערכות חניה אוטומטיות ברכב וצוללות משתמשות בעקרון ההד-מיקום."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/honeycomb.jpg?raw=true",
-    creature: "כוורת דבורים",
-    question: "מה היתרון המבני של צורת המשושה בתאי הכוורת?",
-    answers: [
-      "מבנה משושה משתמש במינימום חומר ליצירת מקסימום נפח ללא חללים ריקים",
-      "המשושים יוצרים זרימת אוויר מיטבית לשמירה על טמפרטורה קבועה",
-      "הצורה המשושית מפזרת כוח באופן שווה ומונעת קריסה"
-    ],
-    correct: 0,
-    techInfo: "חומרי Honeycomb בתעופה וחלל - מבנה לוח הדבש משמש בכנפי מטוסים (בואינג 787), לוויינים ורכבי פורמולה 1. הוא קל במשקל אך חזק במיוחד, וחוסך עד 50% מהמשקל לעומת חומרים מסורתיים."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/insect-eye.jpg?raw=true",
-    creature: "עין חרק מורכבת",
-    question: "איך עין החרק המורכבת מאפשרת ראייה פנורמית?",
-    answers: [
-      "אלפי עדשות זעירות (אומטידיה) היוצרות תמונה מוזאיקה בזווית ראייה של 360 מעלות",
-      "מערכת מראות פנימית המשקפת את האור מכיוונים שונים לרשתית אחת",
-      "העין מסתובבת במהירות גבוהה וסורקת את הסביבה כמו מצלמה"
-    ],
-    correct: 0,
-    techInfo: "מצלמות פנורמיות ורובוטיקה - מצלמות עם עדשות מרובות בהשראת עיני חרקים משמשות במכוניות אוטונומיות, רחפנים ומעקב אבטחה. גם עדשות דיגיטליות דקיקות במיוחד פותחו על בסיס עיקרון זה."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/kingfisher-beak.jpg?raw=true",
-    creature: "שלדג (קינגפישר)",
-    question: "איך השלדג חודר למים במהירות גבוהה ללא התזה?",
-    answers: [
-      "מקור ארוך וחד בצורת טיל שמפחית התנגדות אוויר ויוצר מעבר חלק בין מדיומים",
-      "כנפיים המתקפלות סביב הגוף ממש לפני הכניסה למים",
-      "זווית כניסה מדויקת של 45 מעלות שמבטלת את כוח ההתנגדות"
-    ],
-    correct: 0,
-    techInfo: "עיצוב רכבות Shinkansen - מהנדסי רכבת היפר-מהירה יפנית (500 קמ\"ש) עיצבו את חרטום הרכבת בצורת מקור שלדג. התוצאה: הפחתת בום קולי במנהרות ב-30%, חיסכון באנרגיה של 15% ונסיעה שקטה יותר."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/leafcutter-ant.jpg?raw=true",
-    creature: "נמלת עלים",
-    question: "איך נמלת העלים מסוגלת לשאת משקל פי 50 ממשקל גופה?",
-    answers: [
-      "שלד חיצוני קשיח וזווית מינוף אופטימלית של הלסתות והצוואר",
-      "שרירים בעלי צפיפות סיבים גבוהה פי 100 ממי בעלי חוליות",
-      "מערכת הידרולית פנימית המגבירה כוח באמצעות לחץ נוזלים"
-    ],
-    correct: 0,
-    techInfo: "רובוטיקה מיקרו ומאקרו - רובוטים זעירים המחקים את כוח הנמלים פותחו לניתוחים פולשניים מינימליים. גם מנופים ומכונות הרמה משתמשים בעקרונות המינוף של הנמלים לאופטימיזציה."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/lotus-leaf.jpg?raw=true",
-    creature: "עלה לוטוס",
-    question: "איך עלה הלוטוס נשאר נקי למרות הגידול בבוץ?",
-    answers: [
-      "מבנה ננו-היררכי של בליטות זעירות עם ציפוי שעווה שגורם למים להידחות ולגלגל לכלוך",
-      "הפרשת אנזימים מיוחדים המפרקים חומרים אורגניים על פני העלה",
-      "שכבה חלקה במיוחד שמונעת הידבקות של כל חלקיק זר"
-    ],
-    correct: 0,
-    techInfo: "צבעים וחומרים לעולם ניקיון עצמי - טכנולוגיית אפקט הלוטוס משמשת בצבעים לבניינים, זכוכית המנקה את עצמה, בדים אנטי-כתמים, ואפילו במסכי טלפונים חכמים. חוסכת מיליארדי ליטרי מים ומוצרי ניקוי מדי שנה."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/nautilus.jpg?raw=true",
-    creature: "נאוטילוס",
-    question: "מה מאפשר לספירלה של הנאוטילוס להיות חזקה וקלה?",
-    answers: [
-      "ספירלת פיבונאצ'י עם תאים הממולאים גז המאפשרים ציפה ומבנה חזק בו-זמנית",
-      "חומר הקונכייה עשוי מגביש יהלום ביולוגי קשיח במיוחד",
-      "שכבות של חלבון וקרמיקה המחוברות בדבק ימי עמיד"
-    ],
-    correct: 0,
-    techInfo: "עיצוב מבני אופטימלי ואדריכלות - הספירלה הלוגריתמית של הנאוטילוס משמשת בעיצוב מדרגות, אצטדיונים וגשרים. גם מנועי טורבינה ומדחסים משתמשים בצורה זו לזרימה אופטימלית."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/owl-wing.jpg?raw=true",
-    creature: "ינשוף",
-    question: "איך הינשוף מעופף כמעט ללא רעש?",
-    answers: [
-      "נוצות קצה משוננות ומבנה קטיפתי שמפרק מערבולות אוויר ומבטל רעש אווירודינמי",
-      "תנועת כנפיים איטית במיוחד שמונעת יצירת גלי לחץ",
-      "כנפיים מצופות בחומר סופג קול ביולוגי"
-    ],
-    correct: 0,
-    techInfo: "טורבינות רוח שקטות ומאווררים - חברות כמו Siemens פיתחו להבי טורבינות עם שיניים בקצה בהשראת הינשוף, שמפחיתים רעש ב-10 דציבל. משמש גם במאווררי מחשבים, מזגנים ומטוסים."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/polar-bear-fur.jpg?raw=true",
-    creature: "דוב קוטב",
-    question: "איך פרוות הדוב הקוטבי מבודדת בקור קיצוני?",
-    answers: [
-      "שערות שקופות וחלולות שלוכדות אוויר ומעבירות קרינת UV לעור השחור",
-      "שכבות צפופות של שומן מבודד המשולבות בין השערות",
-      "שערות המכילות נוזל אנטי-קפאון שמונע הצטברות קרח"
-    ],
-    correct: 0,
-    techInfo: "בידוד תרמי מתקדם - בגדי חורף, שקי שינה וחליפות צלילה משתמשים במבנה סיבים חלולים בהשראת הדוב הקוטבי. גם בידוד בניינים וחלליות משתמשים בעקרון זה לשמירה על חום."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/seashell.jpg?raw=true",
-    creature: "צדף (אבלון)",
-    question: "מדוע קונכיית הצדף חזקה פי 3000 מחומר הגלם שלה?",
-    answers: [
-      "מבנה לבני זעירים של סידן קרבונט המחוברים בחלבון אלסטי שעוצר סדקים",
-      "גבישים של יהלום טבעי המוטמעים בשכבות הקונכייה",
-      "טקסטורה מחוספסת המפזרת כוח מכני לכל הכיוונים"
-    ],
-    correct: 0,
-    techInfo: "חומרים מרוכבים חזקים וקלים - מבנה 'אם הפנינה' (nacre) הוביל לפיתוח שריון מתקדם, חומרי בניין עמידים ברעידות אדמה, ושתלים רפואיים חזקים. משמש גם בתעשיית התעופה והחלל."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/shark-skin.jpg?raw=true",
-    creature: "כריש",
-    question: "איך עור הכריש מפחית חיכוך ומונע הצטברות חיידקים?",
-    answers: [
-      "קשקשים זעירים בצורת V (דנטיקלים) היוצרים מערבולות מיקרו שמפחיתות גרר",
-      "הפרשת רירית אנטי-בקטריאלית המכסה את כל שטח העור",
-      "תנועה גלית של העור שמנערת מיקרואורגניזמים"
-    ],
-    correct: 0,
-    techInfo: "בגדי ים אולימפיים וספינות - Speedo Fastskin (אסור כיום בתחרויות) וציפוי ספינות SkinSuit מחקים עור כריש. מפחית צריכת דיזל ב-6% ומונע הצטברות אצות. נבדק גם לשימוש בבתי חולים נגד חיידקים עמידים."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/spider-web.jpg?raw=true",
-    creature: "עכביש",
-    question: "מה הופך את משי העכביש לחזק וגמיש בו-זמנית?",
-    answers: [
-      "מבנה מולקולרי של חלבונים המשלבים אזורים קשיחים ואלסטיים בארגון ספירלי",
-      "סיבי פחמן ננומטריים המשולבים בחומר אורגני",
-      "חוטים כפולים המתפתלים סביב זה את זה כמו חבל"
-    ],
-    correct: 0,
-    techInfo: "סיבים סינתטיים סופר-חזקים - Bolt Threads ו-Spiber מייצרים משי עכביש סינטטי לבגדים, חבלים רפואיים ושריונים. חזק פי 5 מפלדה באותו משקל! משמש גם בתעשיית המוזיקה למיתרי כינור."
-  },
-  {
-    image: "https://github.com/milkabcd-dot/Biomimicry/blob/main/toucan-beak.jpg?raw=true",
-    creature: "טוקן",
-    question: "איך מקור הטוקן משיג חוזק תוך שמירה על משקל מינימלי?",
-    answers: [
-      "מבנה קצף פנימי מחוזק בקורות חלולות עם קליפה חיצונית דקה וקשיחה",
-      "עצם ספוגית דחוסה במיוחד עם צפיפות גבוהה יותר מפלדה",
-      "חלקי מקור מודולריים המתחברים בציריות גמישות"
-    ],
-    correct: 0,
-    techInfo: "חומרי מבנה קלים לרכבים - מבנה ה-sandwich של מקור הטוקן משמש בעיצוב מרכבי מכוניות, כנפי מטוסים וקסדות בטיחות. מספק חוזק מקסימלי עם משקל מינימלי וספיגת אנרגיה מעולה."
+    correct:0,
+    techInfo:"מצלמות פנורמיות"
   }
+  // ← אפשר להמשיך כאן עם כל השאלות שלך
 ];
 
+// ערבוב שאלות
+shuffleArray(quizData);
+
+// ---------- לוגיקה ----------
 let currentIndex = 0;
 let score = 0;
 
-const quizImage = document.getElementById("quizImage");
-const questionText = document.getElementById("questionText");
-const questionNumber = document.getElementById("questionNumber");
+const img = document.getElementById("quizImage");
+const qText = document.getElementById("questionText");
+const qNum = document.getElementById("questionNumber");
 const feedback = document.getElementById("feedback");
 const nextBtn = document.getElementById("nextBtn");
 const progressFill = document.getElementById("progressFill");
 
-function updateProgress() {
-  const progress = ((currentIndex + 1) / quizData.length) * 100;
-  progressFill.style.width = progress + '%';
-}
-
 function loadQuestion() {
   const q = quizData[currentIndex];
-  quizImage.src = q.image;
-  questionText.textContent = q.question;
-  questionNumber.textContent = `שאלה ${currentIndex + 1} מתוך ${quizData.length}`;
-  feedback.style.display = "none";
-  nextBtn.style.display = "none";
-  
-  updateProgress();
-  
-  q.answers.forEach((ans, idx) => {
-    const btn = document.getElementById("ans" + idx);
-    btn.textContent = ans;
-    btn.disabled = false;
-    btn.className = "btn";
-    btn.onclick = () => checkAnswer(idx);
+
+  const answers = q.answers.map((t,i)=>({text:t, isCorrect:i===q.correct}));
+  shuffleArray(answers);
+  q.correctIndex = answers.findIndex(a=>a.isCorrect);
+
+  img.src = q.image;
+  qText.textContent = q.question;
+  qNum.textContent = `שאלה ${currentIndex+1} מתוך ${quizData.length}`;
+  feedback.style.display="none";
+  nextBtn.style.display="none";
+  progressFill.style.width = ((currentIndex+1)/quizData.length)*100+"%";
+
+  answers.forEach((a,i)=>{
+    const btn = document.getElementById("ans"+i);
+    btn.textContent = a.text;
+    btn.className="btn";
+    btn.disabled=false;
+    btn.onclick = ()=>checkAnswer(i);
   });
 }
 
-function checkAnswer(selected) {
+function checkAnswer(i) {
   const q = quizData[currentIndex];
-  
-  // Disable all buttons
-  q.answers.forEach((_, idx) => {
-    document.getElementById("ans" + idx).disabled = true;
-  });
-  
-  feedback.style.display = "block";
-  
-  if (selected === q.correct) {
+  document.querySelectorAll(".btn").forEach(b=>b.disabled=true);
+  feedback.style.display="block";
+
+  if (i===q.correctIndex) {
     score++;
-    feedback.className = "feedback correct";
-    feedback.innerHTML = `
-      <div style="font-size: 1.3em; margin-bottom: 10px;">✅ מצוין! תשובה נכונה!</div>
-      <div class="tech-info">
-        <strong>💡 השראה טכנולוגית:</strong>
-        ${q.techInfo}
-      </div>
-    `;
-    document.getElementById("ans" + selected).classList.add("correct");
+    feedback.className="feedback correct";
+    feedback.innerHTML="✅ נכון!<br>"+q.techInfo;
   } else {
-    feedback.className = "feedback incorrect";
-    feedback.innerHTML = `
-      <div style="font-size: 1.3em; margin-bottom: 10px;">❌ לא נכון...</div>
-      <div style="margin: 10px 0;">התשובה הנכונה היא: <strong>${q.answers[q.correct]}</strong></div>
-      <div class="tech-info">
-        <strong>💡 השראה טכנולוגית:</strong>
-        ${q.techInfo}
-      </div>
-    `;
-    document.getElementById("ans" + selected).classList.add("incorrect");
-    document.getElementById("ans" + q.correct).classList.add("correct");
+    feedback.className="feedback incorrect";
+    feedback.innerHTML="❌ לא נכון<br>"+q.techInfo;
+    document.getElementById("ans"+q.correctIndex).classList.add("correct");
   }
-  
-  nextBtn.style.display = "block";
+  nextBtn.style.display="block";
 }
 
-nextBtn.onclick = () => {
+nextBtn.onclick = ()=>{
   currentIndex++;
-  if (currentIndex < quizData.length) {
-    loadQuestion();
-  } else {
-    showFinalScreen();
+  if (currentIndex<quizData.length) loadQuestion();
+  else {
+    document.getElementById("gameContainer").innerHTML = `
+      <div class="final-screen">
+        <h2>סיימת!</h2>
+        <p>${score} / ${quizData.length}</p>
+        <button class="btn" onclick="location.reload()">שחק שוב</button>
+      </div>`;
   }
 };
 
-function showFinalScreen() {
-  const percentage = Math.round((score / quizData.length) * 100);
-  let message = "";
-  
-  if (percentage === 100) {
-    message = "מושלם! אתה מומחה אמיתי לביומימיקרי! 🏆";
-  } else if (percentage >= 80) {
-    message = "מעולה! יש לך ידע רחב בביומימיקרי! 🌟";
-  } else if (percentage >= 60) {
-    message = "יפה מאוד! אתה בדרך הנכונה! 👍";
-  } else {
-    message = "התחלה טובה! המשך ללמוד על הטבע המדהים! 🌱";
-  }
-  
-  document.getElementById("gameContainer").innerHTML = `
-    <div class="final-screen">
-      <h2>🎉 סיימת את החידון! 🎉</h2>
-      <div class="score-display">${score} / ${quizData.length}</div>
-      <p>${message}</p>
-      <p style="font-size: 1.1em; color: #666; margin: 20px 0;">
-        השגת ${percentage}% תשובות נכונות
-      </p>
-      <button class="restart-btn" onclick="location.reload()">
-        🔄 שחק שוב
-      </button>
-    </div>
-  `;
-}
-
-// Load first question
 loadQuestion();
 </script>
 
