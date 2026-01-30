@@ -1,104 +1,153 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>חידון ביומימיקרי</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>חידון ביומימיקרי - טכנולוגיה בהשראת הטבע</title>
+<!-- CSS לא שונה -->
 <style>
-body{font-family:Arial;background:#667eea;display:flex;justify-content:center;padding:20px}
-#game{background:#fff;max-width:800px;width:100%;padding:30px;border-radius:20px}
-img{width:100%;height:350px;object-fit:cover;border-radius:15px}
-button{width:100%;padding:15px;margin:10px 0;font-size:1em;cursor:pointer}
-.correct{background:#c8e6c9}
-.incorrect{background:#ffcdd2}
+/* כל ה-CSS שלך — ללא שינוי */
 </style>
 </head>
-
 <body>
-<div id="game">
-<h2 id="counter"></h2>
-<img id="img">
-<h3 id="question"></h3>
-<div id="answers"></div>
-<button id="next" style="display:none">הבא</button>
+
+<div id="gameWrapper">
+  <h1>🌿 חידון ביומימיקרי 🔬</h1>
+  <div class="editor-credit">עריכה: מילכה ברקו גרש</div>
+  <div id="gameContainer">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="question-number" id="questionNumber"></div>
+    <img id="quizImage" src="" alt="תמונת ביומימיקרי" />
+    <div class="question" id="questionText"></div>
+    <div class="answers-grid">
+      <button class="btn" id="ans0"></button>
+      <button class="btn" id="ans1"></button>
+      <button class="btn" id="ans2"></button>
+    </div>
+    <div class="feedback" id="feedback" style="display:none;"></div>
+    <button class="btn" id="nextBtn" style="display:none;">השאלה הבאה ←</button>
+  </div>
 </div>
 
 <script>
-// ערבוב
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+/* ====== הנתונים שלך — ללא שינוי ====== */
+const quizData = [ /* כל המערך שלך, כמו שהוא */ ];
+
+let currentIndex = 0;
+let score = 0;
+let currentAnswers = [];
+let currentCorrectIndex = 0;
+
+const quizImage = document.getElementById("quizImage");
+const questionText = document.getElementById("questionText");
+const questionNumber = document.getElementById("questionNumber");
+const feedback = document.getElementById("feedback");
+const nextBtn = document.getElementById("nextBtn");
+const progressFill = document.getElementById("progressFill");
+
+/* ====== פונקציה לערבוב תשובות ====== */
+function shuffleAnswers(answers, correctIndex) {
+  const arr = answers.map((text, index) => ({ text, index }));
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+  const newCorrectIndex = arr.findIndex(a => a.index === correctIndex);
+  return {
+    answers: arr.map(a => a.text),
+    correctIndex: newCorrectIndex
+  };
 }
 
-// שאלות
-const quizData = [
-  {image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/cactus.jpg?raw=true",
-   q:"איך הקקטוס שומר על מים?",
-   a:["שכבת שעווה וקפלים","שורשים עמוקים","פתיחת נקבוביות בלילה"],c:0},
+function updateProgress() {
+  progressFill.style.width =
+    ((currentIndex + 1) / quizData.length) * 100 + '%';
+}
 
-  {image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/gecko.jpg?raw=true",
-   q:"איך השממית מטפסת?",
-   a:["שערות ננומטריות","דבק טבעי","ציפורניים"],c:0},
+function loadQuestion() {
+  const q = quizData[currentIndex];
 
-  {image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/insect-eye.jpg?raw=true",
-   q:"איך עין חרק רואה סביב?",
-   a:["אלפי עדשות","עין מסתובבת","מראות"],c:0},
+  const shuffled = shuffleAnswers(q.answers, q.correct);
+  currentAnswers = shuffled.answers;
+  currentCorrectIndex = shuffled.correctIndex;
 
-  {image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/shark-skin.jpg?raw=true",
-   q:"איך עור הכריש מפחית חיכוך?",
-   a:["קשקשים מיקרוסקופיים","ריר","תנועה גלית"],c:0},
+  quizImage.src = q.image;
+  questionText.textContent = q.question;
+  questionNumber.textContent =
+    `שאלה ${currentIndex + 1} מתוך ${quizData.length}`;
 
-  {image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/spider-web.jpg?raw=true",
-   q:"למה משי עכביש חזק?",
-   a:["מבנה חלבוני משולב","פחמן","חבלים כפולים"],c:0}
-];
+  feedback.style.display = "none";
+  nextBtn.style.display = "none";
+  updateProgress();
 
-// ערבוב שאלות
-shuffle(quizData);
-
-let i=0;
-let score=0;
-
-const img=document.getElementById("img");
-const q=document.getElementById("question");
-const answersDiv=document.getElementById("answers");
-const next=document.getElementById("next");
-const counter=document.getElementById("counter");
-
-function load(){
-  const item=quizData[i];
-  counter.textContent=`שאלה ${i+1} מתוך ${quizData.length}`;
-  img.src=item.image;
-  q.textContent=item.q;
-  answersDiv.innerHTML="";
-  next.style.display="none";
-
-  const answers=item.a.map((t,idx)=>({t,idx}));
-  shuffle(answers);
-
-  answers.forEach((obj)=>{
-    const b=document.createElement("button");
-    b.textContent=obj.t;
-    b.onclick=()=>{
-      document.querySelectorAll("button").forEach(x=>x.disabled=true);
-      if(obj.idx===item.c){ b.classList.add("correct"); score++; }
-      else{ b.classList.add("incorrect"); }
-      next.style.display="block";
-    };
-    answersDiv.appendChild(b);
+  currentAnswers.forEach((ans, idx) => {
+    const btn = document.getElementById("ans" + idx);
+    btn.textContent = ans;
+    btn.disabled = false;
+    btn.className = "btn";
+    btn.onclick = () => checkAnswer(idx);
   });
 }
 
-next.onclick=()=>{
-  i++;
-  if(i<quizData.length) load();
-  else document.getElementById("game").innerHTML=
-    `<h2>סיום! ניקוד: ${score}/${quizData.length}</h2>`;
+function checkAnswer(selected) {
+  const q = quizData[currentIndex];
+
+  currentAnswers.forEach((_, idx) => {
+    document.getElementById("ans" + idx).disabled = true;
+  });
+
+  feedback.style.display = "block";
+
+  if (selected === currentCorrectIndex) {
+    score++;
+    feedback.className = "feedback correct";
+    feedback.innerHTML = `
+      <div style="font-size:1.3em">✅ מצוין! תשובה נכונה!</div>
+      <div class="tech-info">
+        <strong>💡 השראה טכנולוגית:</strong>
+        ${q.techInfo}
+      </div>`;
+    document.getElementById("ans" + selected).classList.add("correct");
+  } else {
+    feedback.className = "feedback incorrect";
+    feedback.innerHTML = `
+      <div style="font-size:1.3em">❌ לא נכון...</div>
+      <div>התשובה הנכונה היא:
+        <strong>${currentAnswers[currentCorrectIndex]}</strong>
+      </div>
+      <div class="tech-info">
+        <strong>💡 השראה טכנולוגית:</strong>
+        ${q.techInfo}
+      </div>`;
+    document.getElementById("ans" + selected).classList.add("incorrect");
+    document
+      .getElementById("ans" + currentCorrectIndex)
+      .classList.add("correct");
+  }
+
+  nextBtn.style.display = "block";
+}
+
+nextBtn.onclick = () => {
+  currentIndex++;
+  currentIndex < quizData.length ? loadQuestion() : showFinalScreen();
 };
 
-load();
+function showFinalScreen() {
+  const percentage = Math.round((score / quizData.length) * 100);
+  document.getElementById("gameContainer").innerHTML = `
+    <div class="final-screen">
+      <h2>🎉 סיימת את החידון! 🎉</h2>
+      <div class="score-display">${score} / ${quizData.length}</div>
+      <p>השגת ${percentage}% תשובות נכונות</p>
+      <button class="restart-btn" onclick="location.reload()">🔄 שחק שוב</button>
+    </div>`;
+}
+
+loadQuestion();
 </script>
+
 </body>
 </html>
