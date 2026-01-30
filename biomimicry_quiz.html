@@ -1,153 +1,123 @@
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>חידון ביומימיקרי - טכנולוגיה בהשראת הטבע</title>
-<!-- CSS לא שונה -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חידון ביומימיקרי</title>
+
 <style>
-/* כל ה-CSS שלך — ללא שינוי */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+#game {
+  background:white;
+  max-width:800px;
+  width:100%;
+  border-radius:20px;
+  padding:30px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+h1 { text-align:center; margin-bottom:5px; }
+.credit { text-align:center; margin-bottom:20px; font-weight:bold; }
+img {
+  width:100%;
+  height:350px;
+  object-fit:cover;
+  border-radius:15px;
+  margin-bottom:20px;
+}
+.question { font-size:1.4em; margin-bottom:20px; }
+.answers button {
+  width:100%;
+  margin-bottom:12px;
+  padding:15px;
+  font-size:1em;
+  border-radius:10px;
+  border:2px solid #ddd;
+  background:#fff;
+  cursor:pointer;
+}
+.answers button:hover:not(:disabled) {
+  border-color:#667eea;
+}
+.correct { background:#d4edda !important; border-color:#28a745 !important; }
+.incorrect { background:#f8d7da !important; border-color:#dc3545 !important; }
+#feedback { margin-top:20px; }
+#next {
+  display:none;
+  margin-top:20px;
+  width:100%;
+  padding:15px;
+  font-size:1.1em;
+  background:#667eea;
+  color:white;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
 </style>
 </head>
-<body>
 
-<div id="gameWrapper">
+<body>
+<div id="game">
   <h1>🌿 חידון ביומימיקרי 🔬</h1>
-  <div class="editor-credit">עריכה: מילכה ברקו גרש</div>
-  <div id="gameContainer">
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div class="question-number" id="questionNumber"></div>
-    <img id="quizImage" src="" alt="תמונת ביומימיקרי" />
-    <div class="question" id="questionText"></div>
-    <div class="answers-grid">
-      <button class="btn" id="ans0"></button>
-      <button class="btn" id="ans1"></button>
-      <button class="btn" id="ans2"></button>
-    </div>
-    <div class="feedback" id="feedback" style="display:none;"></div>
-    <button class="btn" id="nextBtn" style="display:none;">השאלה הבאה ←</button>
+  <div class="credit">עריכה: מילכה ברקו גרש</div>
+
+  <img id="img" src="" alt="">
+  <div class="question" id="question"></div>
+
+  <div class="answers">
+    <button id="a0"></button>
+    <button id="a1"></button>
+    <button id="a2"></button>
   </div>
+
+  <div id="feedback"></div>
+  <button id="next">שאלה הבאה ←</button>
 </div>
 
 <script>
-/* ====== הנתונים שלך — ללא שינוי ====== */
-const quizData = [ /* כל המערך שלך, כמו שהוא */ ];
-
-let currentIndex = 0;
-let score = 0;
-let currentAnswers = [];
-let currentCorrectIndex = 0;
-
-const quizImage = document.getElementById("quizImage");
-const questionText = document.getElementById("questionText");
-const questionNumber = document.getElementById("questionNumber");
-const feedback = document.getElementById("feedback");
-const nextBtn = document.getElementById("nextBtn");
-const progressFill = document.getElementById("progressFill");
-
-/* ====== פונקציה לערבוב תשובות ====== */
-function shuffleAnswers(answers, correctIndex) {
-  const arr = answers.map((text, index) => ({ text, index }));
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  const newCorrectIndex = arr.findIndex(a => a.index === correctIndex);
-  return {
-    answers: arr.map(a => a.text),
-    correctIndex: newCorrectIndex
-  };
-}
-
-function updateProgress() {
-  progressFill.style.width =
-    ((currentIndex + 1) / quizData.length) * 100 + '%';
-}
-
-function loadQuestion() {
-  const q = quizData[currentIndex];
-
-  const shuffled = shuffleAnswers(q.answers, q.correct);
-  currentAnswers = shuffled.answers;
-  currentCorrectIndex = shuffled.correctIndex;
-
-  quizImage.src = q.image;
-  questionText.textContent = q.question;
-  questionNumber.textContent =
-    `שאלה ${currentIndex + 1} מתוך ${quizData.length}`;
-
-  feedback.style.display = "none";
-  nextBtn.style.display = "none";
-  updateProgress();
-
-  currentAnswers.forEach((ans, idx) => {
-    const btn = document.getElementById("ans" + idx);
-    btn.textContent = ans;
-    btn.disabled = false;
-    btn.className = "btn";
-    btn.onclick = () => checkAnswer(idx);
-  });
-}
-
-function checkAnswer(selected) {
-  const q = quizData[currentIndex];
-
-  currentAnswers.forEach((_, idx) => {
-    document.getElementById("ans" + idx).disabled = true;
-  });
-
-  feedback.style.display = "block";
-
-  if (selected === currentCorrectIndex) {
-    score++;
-    feedback.className = "feedback correct";
-    feedback.innerHTML = `
-      <div style="font-size:1.3em">✅ מצוין! תשובה נכונה!</div>
-      <div class="tech-info">
-        <strong>💡 השראה טכנולוגית:</strong>
-        ${q.techInfo}
-      </div>`;
-    document.getElementById("ans" + selected).classList.add("correct");
-  } else {
-    feedback.className = "feedback incorrect";
-    feedback.innerHTML = `
-      <div style="font-size:1.3em">❌ לא נכון...</div>
-      <div>התשובה הנכונה היא:
-        <strong>${currentAnswers[currentCorrectIndex]}</strong>
-      </div>
-      <div class="tech-info">
-        <strong>💡 השראה טכנולוגית:</strong>
-        ${q.techInfo}
-      </div>`;
-    document.getElementById("ans" + selected).classList.add("incorrect");
-    document
-      .getElementById("ans" + currentCorrectIndex)
-      .classList.add("correct");
-  }
-
-  nextBtn.style.display = "block";
-}
-
-nextBtn.onclick = () => {
-  currentIndex++;
-  currentIndex < quizData.length ? loadQuestion() : showFinalScreen();
-};
-
-function showFinalScreen() {
-  const percentage = Math.round((score / quizData.length) * 100);
-  document.getElementById("gameContainer").innerHTML = `
-    <div class="final-screen">
-      <h2>🎉 סיימת את החידון! 🎉</h2>
-      <div class="score-display">${score} / ${quizData.length}</div>
-      <p>השגת ${percentage}% תשובות נכונות</p>
-      <button class="restart-btn" onclick="location.reload()">🔄 שחק שוב</button>
-    </div>`;
-}
-
-loadQuestion();
-</script>
-
-</body>
-</html>
+const quiz = [
+  {
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/cactus.jpg?raw=true",
+    q:"איך הקקטוס שומר על מים בסביבה מדברית?",
+    answers:[
+      "שכבת שעווה עבה וקפלים המפחיתים אידוי",
+      "שורשים ארוכים במיוחד",
+      "פתיחת נקבוביות רק בלילה"
+    ],
+    correct:0,
+    info:"מבנים מדבריים וגגות הצללה בהשראת קקטוסים."
+  },
+  {
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/gecko.jpg?raw=true",
+    q:"איך השממית מטפסת על קירות חלקים?",
+    answers:[
+      "שערות ננומטריות היוצרות כוחות ואן־דר־ואלס",
+      "הפרשת דבק נוזלי",
+      "ציפורניים מיקרוסקופיות"
+    ],
+    correct:0,
+    info:"פיתוח דבקים יבשים ורובוטיקה."
+  },
+  {
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/bat-echolocation.jpg?raw=true",
+    q:"איך העטלף מתמצא בחושך?",
+    answers:[
+      "גלי קול והחזרי הד",
+      "שדות מגנטיים",
+      "חוש ריח קיצוני"
+    ],
+    correct:0,
+    info:"סונאר, חיישני חניה ומקלות חכמים לעיוורים."
+  },
+  {
+    image:"https://github.com/milkabcd-dot/Biomimicry/blob/main/honeycomb.jpg?raw=true",
+    q:"למה מבנה הכוורת
